@@ -1,50 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
-
-/* Establish MySql Database Connection */
-const mySqlConnection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '',
-    database : 'student_db'
-  });
-  
-  mySqlConnection.connect(error => {
-    if(!error){
-      console.log(`DB Connection Succeded! as ${mySqlConnection.threadId}`);
-    }else{
-      console.log(`DB Connection Failed! as ${error.stack}`);
-    }
-  });
+const studentInfoController = require("./../../app/controllers/studentInfoController");
+const mysqlCon = require('./../../app/dbConn/mysqlCon');
+const mySqlConnection = mysqlCon.mySqlDbConnection;
 
 /* inserting student info */
-router.post('/insertInfo', (req, res, next) => {
-    const query = "INSERT INTO student_info (Name, Class, Roll_No, Age, Address) VALUES ('Prashant3', '10th', '57', '25', 'Chaibasa')";
-    mySqlConnection.query(query, (err, rows, fields) => {
-        if(!err){
-            res.send({statusCode: 0, msg: 'Data Inserted successfully!'});
-        }else{
-            console.log('some error ocurred!');
-        }
-    })
-});
+router.post('/insertInfo', studentInfoController.insertStudentInfo);
 
 
 /* Update student Info */
 router.post('/updateInfo', (req, res, next) => {
-    
-
+    if(!req.body.Id || !req.body.address){
+        res.send({status: 'N/A', statusDesc: 'Either parameter not passed or wrong parameter !'});
+    }else{
+        const query = `UPDATE student_info SET Address = '${req.body.address}' WHERE Id = '${req.body.Id}'`;
+        mySqlConnection.query(query, (err, rows, fields) => {
+            if(!err){
+                res.send({statusCode: 0, msg: 'Data updated successfully!'});
+            }else{
+                console.log('Some error ocurred!');
+            }
+        });
+    }
 });
 
 
 /* Fetch student Info */
-router.get('/fetchInfo', (req, res, next) =>{
+router.get('/fetchInfo', (req, res, next) => {
     const query = 'SELECT * from student_info';
     mySqlConnection.query(query, (err, rows, fields) => {
         if(!err){
-            if(!rows){
-                res.send({statusCode: 0, msg: 'No data found!'});
+            if(rows.length == 0){
+                res.send({statusCode: -1, msg: 'No data found!'});
             }else{
                 res.send({statusCode: 0, data: rows});
             }
@@ -57,6 +44,18 @@ router.get('/fetchInfo', (req, res, next) =>{
 
 /* Delete student Info */
 router.post('/deleteInfo', (req, res, next) => {
+    if(!req.body.Id){
+        res.send({status: 'N/A', statusDesc: 'Either parameter not passed or wrong parameter !'});
+    }else{
+        const query = `DELETE FROM student_info WHERE Id = '${req.body.Id}'`;
+        mySqlConnection.query(query, (err, rows, fields) => {
+            if(!err) {
+                res.send({statusCode: 0, msg: 'Record Deleted Successfully!'});
+            }else{
+                console.log('some error ocurred!');
+            }
+        })
+    }
 
 });
 

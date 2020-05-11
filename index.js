@@ -8,7 +8,6 @@ const logger = require('./app/libs/loggerLib');
 const productRoute = require('./app/routes/product');
 const studentInfoRoute = require('./app/routes/studentInfo')
 const appConfig = require('./config/appConfig');
-const mysql = require('mysql');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
